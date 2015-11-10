@@ -1,0 +1,54 @@
+<launch>
+
+<!-- these are the arguments you can pass this launch file, for example paused:=true -->
+  <arg name="paused" default="false"/>
+  <arg name="use_sim_time" default="true"/>
+  <arg name="gui" default="true"/>
+  <arg name="headless" default="false"/>
+  <arg name="debug" default="false"/>
+
+  <!-- We resume the logic in empty_world.launch, changing only the name of the world to be launched -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find audi_gazebo)/worlds/vrc_final_task1.world"/>
+    <arg name="debug" value="$(arg debug)" />
+    <arg name="gui" value="$(arg gui)" />
+    <arg name="paused" value="$(arg paused)"/>
+    <arg name="use_sim_time" value="$(arg use_sim_time)"/>
+    <arg name="headless" value="$(arg headless)"/>
+  </include>
+
+
+   <!--node pkg="tf" type="static_transform_publisher" name="map_to_odom_broadcaster" args="0 0 0 0 0 0 map nav 100" /-->
+
+   <!-- Robot with diff drive -->
+  	<include file="$(find test_description)/launch/fuCar.gazebo.launch">
+   	</include>
+
+   	<!--node pkg="tf" type="static_transform_publisher" name="base_to_odom_r1" args="0.0 -0.0 0.0 0.0 0.0 0.0 base_link fuCar/odom 200" /-->
+    <!--node pkg="tf" type="static_transform_publisher" name="base_to_odom_r1" args="0.0 0.0 0.0 0.0 0.0 0.0 map fuCar/chassis 200" /-->
+
+     
+  	<!-- RVIZ -->
+  	<!--node pkg="rviz" type="rviz" name="rviz" args="-d $(find test_description)/launch/fuCar.rviz" /-->
+
+     <!-- % rosrun joy joy_node _dev:=/dev/input/js0 _deadzone:=0.12 --> 
+    <node respawn="true" pkg="joy" type="joy_node" name="gamepad" >
+      <param name="dev" type="string" value="/dev/input/js0" />
+      <param name="deadzone" value="0.12" />
+    </node>
+
+
+  <!-- Load the URDF into the ROS Parameter Server -->
+  <!--param name="robot_description"
+	 command="$(find xacro)/xacro.py $(find test_gazebo)/model/model.sdf" /-->
+
+  <!-- Run a python script to the send a service call to gazebo_ros to spawn a URDF robot -->
+
+
+  <!--node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
+	args="-urdf -model test -param robot_description"/-->
+
+  <!-- ros_control test launch file -->
+  <!--include file="$(find test_control)/launch/test_control.launch"/-->
+
+</launch>
